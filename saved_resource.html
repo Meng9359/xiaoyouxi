@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<!-- saved from url=(0012)about:srcdoc -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>像素艺术创作 - 设计小游戏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f1f1f1;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0c0;
+            margin-bottom: 20px;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .canvas-container {
+            background-color: #0f3460;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            flex: 1;
+            min-width: 300px;
+            max-width: 700px;
+        }
+        
+        .tools-panel {
+            background-color: #0f3460;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            width: 320px;
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #00dbde;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-title i {
+            font-size: 1.3rem;
+        }
+        
+        .canvas {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            grid-template-rows: repeat(16, 1fr);
+            width: 100%;
+            aspect-ratio: 1/1;
+            background-color: #2c2c54;
+            border: 2px solid #4a4a8a;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .pixel {
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        
+        .pixel:hover {
+            transform: scale(1.1);
+            z-index: 1;
+            position: relative;
+        }
+        
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+            margin-bottom: 25px;
+        }
+        
+        .color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .color:hover {
+            transform: scale(1.2);
+            border-color: white;
+        }
+        
+        .color.active {
+            transform: scale(1.2);
+            border-color: white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+        }
+        
+        .tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .tool {
+            background-color: #2c2c54;
+            border: none;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            min-width: 70px;
+            transition: all 0.2s;
+        }
+        
+        .tool:hover {
+            background-color: #3d3d7a;
+            transform: translateY(-3px);
+        }
+        
+        .tool.active {
+            background-color: #00dbde;
+            color: #0f3460;
+            box-shadow: 0 5px 15px rgba(0, 219, 222, 0.3);
+        }
+        
+        .tool i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .tool span {
+            font-size: 0.9rem;
+        }
+        
+        .preview-section {
+            background-color: #0f3460;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .preview-canvas {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            grid-template-rows: repeat(16, 1fr);
+            width: 200px;
+            height: 200px;
+            background-color: #2c2c54;
+            border: 2px solid #4a4a8a;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .preview-pixel {
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .action-btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        
+        .save-btn {
+            background: linear-gradient(90deg, #00dbde, #008cff);
+            color: white;
+        }
+        
+        .clear-btn {
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+            color: white;
+        }
+        
+        .preset-btn {
+            background: linear-gradient(90deg, #7bff7b, #00b300);
+            color: white;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .instructions {
+            background-color: rgba(15, 52, 96, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        
+        .instructions h3 {
+            color: #00dbde;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a0a0c0;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tools-panel {
+                width: 100%;
+                max-width: 500px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+        
+        .current-color-display {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            border: 3px solid white;
+            margin: 0 auto 20px;
+        }
+        
+        .color-selector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .preset-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .preset-option {
+            padding: 8px 12px;
+            background-color: #2c2c54;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .preset-option:hover {
+            background-color: #3d3d7a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-gamepad"></i> 像素艺术创作</h1>
+            <p class="subtitle">发挥你的创意，设计独特的像素艺术作品！点击下方像素格开始创作</p>
+        </header>
+        
+        <div class="game-area">
+            <div class="canvas-container">
+                <h2 class="panel-title"><i class="fas fa-palette"></i> 创作画布</h2>
+                <div class="canvas" id="pixelCanvas"><div class="pixel" data-row="0" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="0" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="1" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="2" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="3" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="4" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="5" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="6" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="7" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="8" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="9" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="10" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="11" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="12" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="13" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="14" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="pixel" data-row="15" data-col="15" style="background-color: rgb(44, 44, 84);"></div></div>
+                <p>点击像素格上色，使用不同工具创作你的像素艺术</p>
+            </div>
+            
+            <div class="tools-panel">
+                <h2 class="panel-title"><i class="fas fa-tools"></i> 工具与颜色</h2>
+                
+                <div class="color-selector">
+                    <div class="current-color-display" id="currentColorDisplay" style="background-color: rgb(255, 71, 87);"></div>
+                    <p>当前颜色</p>
+                </div>
+                
+                <h3>调色板</h3>
+                <div class="color-palette" id="colorPalette"><div class="color active" data-color="#FF4757" style="background-color: rgb(255, 71, 87);"></div><div class="color" data-color="#FF6B81" style="background-color: rgb(255, 107, 129);"></div><div class="color" data-color="#FFA502" style="background-color: rgb(255, 165, 2);"></div><div class="color" data-color="#FFD32A" style="background-color: rgb(255, 211, 42);"></div><div class="color" data-color="#FFDD59" style="background-color: rgb(255, 221, 89);"></div><div class="color" data-color="#1E90FF" style="background-color: rgb(30, 144, 255);"></div><div class="color" data-color="#3742FA" style="background-color: rgb(55, 66, 250);"></div><div class="color" data-color="#5352ED" style="background-color: rgb(83, 82, 237);"></div><div class="color" data-color="#2ED573" style="background-color: rgb(46, 213, 115);"></div><div class="color" data-color="#20BF6B" style="background-color: rgb(32, 191, 107);"></div><div class="color" data-color="#26DE81" style="background-color: rgb(38, 222, 129);"></div><div class="color" data-color="#F97F51" style="background-color: rgb(249, 127, 81);"></div><div class="color" data-color="#FC5C65" style="background-color: rgb(252, 92, 101);"></div><div class="color" data-color="#FD7272" style="background-color: rgb(253, 114, 114);"></div><div class="color" data-color="#9B59B6" style="background-color: rgb(155, 89, 182);"></div><div class="color" data-color="#8E44AD" style="background-color: rgb(142, 68, 173);"></div><div class="color" data-color="#7158E2" style="background-color: rgb(113, 88, 226);"></div><div class="color" data-color="#3D3D3D" style="background-color: rgb(61, 61, 61);"></div><div class="color" data-color="#4B4B4B" style="background-color: rgb(75, 75, 75);"></div><div class="color" data-color="#FFFFFF" style="background-color: rgb(255, 255, 255);"></div><div class="color" data-color="#000000" style="background-color: rgb(0, 0, 0);"></div><div class="color" data-color="#FF9FF3" style="background-color: rgb(255, 159, 243);"></div><div class="color" data-color="#F368E0" style="background-color: rgb(243, 104, 224);"></div><div class="color" data-color="#00D2D3" style="background-color: rgb(0, 210, 211);"></div><div class="color" data-color="#01A3A4" style="background-color: rgb(1, 163, 164);"></div></div>
+                
+                <h3>绘画工具</h3>
+                <div class="tools" id="tools"><button class="tool active" data-tool="brush"><i class="fas fa-paint-brush"></i><span>画笔</span></button><button class="tool" data-tool="eraser"><i class="fas fa-eraser"></i><span>橡皮擦</span></button><button class="tool" data-tool="fill"><i class="fas fa-fill-drip"></i><span>填充</span></button><button class="tool" data-tool="picker"><i class="fas fa-eye-dropper"></i><span>取色器</span></button></div>
+                
+                <h3>预设图案</h3>
+                <div class="preset-options" id="presetOptions"><div class="preset-option" data-preset="heart">心形</div><div class="preset-option" data-preset="star">星星</div><div class="preset-option" data-preset="cat">小猫</div><div class="preset-option" data-preset="house">房子</div><div class="preset-option" data-preset="tree">树</div></div>
+            </div>
+        </div>
+        
+        <div class="preview-section">
+            <h2 class="panel-title"><i class="fas fa-eye"></i> 作品预览</h2>
+            <div class="preview-container">
+                <div class="preview-canvas" id="previewCanvas"><div class="preview-pixel" data-row="0" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="0" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="1" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="2" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="3" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="4" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="5" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="6" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="7" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="8" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="9" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="10" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="11" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="12" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="13" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="14" data-col="15" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="0" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="1" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="2" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="3" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="4" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="5" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="6" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="7" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="8" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="9" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="10" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="11" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="12" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="13" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="14" style="background-color: rgb(44, 44, 84);"></div><div class="preview-pixel" data-row="15" data-col="15" style="background-color: rgb(44, 44, 84);"></div></div>
+                
+                <div class="actions">
+                    <button class="action-btn save-btn" id="saveBtn">
+                        <i class="fas fa-save"></i> 保存作品
+                    </button>
+                    <button class="action-btn clear-btn" id="clearBtn">
+                        <i class="fas fa-broom"></i> 清空画布
+                    </button>
+                    <button class="action-btn preset-btn" id="randomBtn">
+                        <i class="fas fa-random"></i> 随机图案
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> 游戏说明</h3>
+            <ul>
+                <li><strong>画笔工具</strong>：点击画布像素格上色</li>
+                <li><strong>橡皮擦工具</strong>：擦除已上色的像素格</li>
+                <li><strong>填充工具</strong>：点击填充相连的相同颜色区域</li>
+                <li><strong>颜色选择</strong>：从调色板中选择颜色，当前颜色会显示在顶部</li>
+                <li><strong>预设图案</strong>：点击预设图案快速绘制参考图形</li>
+                <li><strong>保存作品</strong>：将你的作品保存到本地（模拟功能）</li>
+                <li><strong>清空画布</strong>：一键清除所有像素颜色</li>
+            </ul>
+        </div>
+        
+        <footer>
+            <p>像素艺术创作 | 设计小游戏 | 可以在线预览和创作</p>
+            <p>使用HTML5、CSS3和JavaScript构建 | 绘梦匣子</p>
+        </footer>
+    </div>
+
+    <script>
+        // 游戏状态和配置
+        const gameState = {
+            currentColor: '#FF4757',
+            currentTool: 'brush',
+            canvasSize: 16,
+            pixels: [],
+            previewPixels: []
+        };
+
+        // 颜色调色板
+        const colorPalette = [
+            '#FF4757', '#FF6B81', '#FFA502', '#FFD32A', '#FFDD59',
+            '#1E90FF', '#3742FA', '#5352ED', '#2ED573', '#20BF6B',
+            '#26DE81', '#F97F51', '#FC5C65', '#FD7272', '#9B59B6',
+            '#8E44AD', '#7158E2', '#3D3D3D', '#4B4B4B', '#FFFFFF',
+            '#000000', '#FF9FF3', '#F368E0', '#00D2D3', '#01A3A4'
+        ];
+
+        // 工具列表
+        const tools = [
+            { id: 'brush', name: '画笔', icon: 'fas fa-paint-brush' },
+            { id: 'eraser', name: '橡皮擦', icon: 'fas fa-eraser' },
+            { id: 'fill', name: '填充', icon: 'fas fa-fill-drip' },
+            { id: 'picker', name: '取色器', icon: 'fas fa-eye-dropper' }
+        ];
+
+        // 预设图案
+        const presets = [
+            { name: '心形', id: 'heart' },
+            { name: '星星', id: 'star' },
+            { name: '小猫', id: 'cat' },
+            { name: '房子', id: 'house' },
+            { name: '树', id: 'tree' }
+        ];
+
+        // 初始化函数
+        function initGame() {
+            initCanvas();
+            initColorPalette();
+            initTools();
+            initPresets();
+            initEventListeners();
+            updateCurrentColorDisplay();
+        }
+
+        // 初始化画布
+        function initCanvas() {
+            const pixelCanvas = document.getElementById('pixelCanvas');
+            const previewCanvas = document.getElementById('previewCanvas');
+            
+            // 清空画布
+            pixelCanvas.innerHTML = '';
+            previewCanvas.innerHTML = '';
+            
+            // 重置像素数组
+            gameState.pixels = [];
+            gameState.previewPixels = [];
+            
+            // 创建像素
+            for (let row = 0; row < gameState.canvasSize; row++) {
+                gameState.pixels[row] = [];
+                gameState.previewPixels[row] = [];
+                
+                for (let col = 0; col < gameState.canvasSize; col++) {
+                    // 创建主画布像素
+                    const pixel = document.createElement('div');
+                    pixel.className = 'pixel';
+                    pixel.dataset.row = row;
+                    pixel.dataset.col = col;
+                    pixel.style.backgroundColor = '#2c2c54';
+                    
+                    // 添加到主画布
+                    pixelCanvas.appendChild(pixel);
+                    
+                    // 存储像素元素
+                    gameState.pixels[row][col] = {
+                        element: pixel,
+                        color: '#2c2c54'
+                    };
+                    
+                    // 创建预览画布像素
+                    const previewPixel = document.createElement('div');
+                    previewPixel.className = 'preview-pixel';
+                    previewPixel.dataset.row = row;
+                    previewPixel.dataset.col = col;
+                    previewPixel.style.backgroundColor = '#2c2c54';
+                    
+                    // 添加到预览画布
+                    previewCanvas.appendChild(previewPixel);
+                    
+                    // 存储预览像素元素
+                    gameState.previewPixels[row][col] = {
+                        element: previewPixel,
+                        color: '#2c2c54'
+                    };
+                }
+            }
+            
+            // 添加像素点击事件
+            pixelCanvas.addEventListener('click', handlePixelClick);
+        }
+
+        // 初始化颜色调色板
+        function initColorPalette() {
+            const colorPaletteElement = document.getElementById('colorPalette');
+            colorPaletteElement.innerHTML = '';
+            
+            colorPalette.forEach(color => {
+                const colorElement = document.createElement('div');
+                colorElement.className = 'color';
+                colorElement.style.backgroundColor = color;
+                colorElement.dataset.color = color;
+                
+                // 设置第一个颜色为默认选中
+                if (color === gameState.currentColor) {
+                    colorElement.classList.add('active');
+                }
+                
+                colorElement.addEventListener('click', () => {
+                    // 移除所有颜色的active类
+                    document.querySelectorAll('.color').forEach(c => c.classList.remove('active'));
+                    
+                    // 为点击的颜色添加active类
+                    colorElement.classList.add('active');
+                    
+                    // 更新当前颜色
+                    gameState.currentColor = color;
+                    updateCurrentColorDisplay();
+                });
+                
+                colorPaletteElement.appendChild(colorElement);
+            });
+        }
+
+        // 初始化工具
+        function initTools() {
+            const toolsElement = document.getElementById('tools');
+            toolsElement.innerHTML = '';
+            
+            tools.forEach(tool => {
+                const toolElement = document.createElement('button');
+                toolElement.className = 'tool';
+                toolElement.innerHTML = `<i class="${tool.icon}"></i><span>${tool.name}</span>`;
+                toolElement.dataset.tool = tool.id;
+                
+                // 设置画笔为默认选中
+                if (tool.id === gameState.currentTool) {
+                    toolElement.classList.add('active');
+                }
+                
+                toolElement.addEventListener('click', () => {
+                    // 移除所有工具的active类
+                    document.querySelectorAll('.tool').forEach(t => t.classList.remove('active'));
+                    
+                    // 为点击的工具添加active类
+                    toolElement.classList.add('active');
+                    
+                    // 更新当前工具
+                    gameState.currentTool = tool.id;
+                });
+                
+                toolsElement.appendChild(toolElement);
+            });
+        }
+
+        // 初始化预设图案
+        function initPresets() {
+            const presetOptions = document.getElementById('presetOptions');
+            presetOptions.innerHTML = '';
+            
+            presets.forEach(preset => {
+                const presetElement = document.createElement('div');
+                presetElement.className = 'preset-option';
+                presetElement.textContent = preset.name;
+                presetElement.dataset.preset = preset.id;
+                
+                presetElement.addEventListener('click', () => {
+                    loadPreset(preset.id);
+                });
+                
+                presetOptions.appendChild(presetElement);
+            });
+        }
+
+        // 初始化事件监听
+        function initEventListeners() {
+            // 保存按钮
+            document.getElementById('saveBtn').addEventListener('click', saveArtwork);
+            
+            // 清空按钮
+            document.getElementById('clearBtn').addEventListener('click', clearCanvas);
+            
+            // 随机图案按钮
+            document.getElementById('randomBtn').addEventListener('click', generateRandomArt);
+        }
+
+        // 更新当前颜色显示
+        function updateCurrentColorDisplay() {
+            const currentColorDisplay = document.getElementById('currentColorDisplay');
+            currentColorDisplay.style.backgroundColor = gameState.currentColor;
+        }
+
+        // 处理像素点击
+        function handlePixelClick(event) {
+            const pixel = event.target;
+            if (!pixel.classList.contains('pixel')) return;
+            
+            const row = parseInt(pixel.dataset.row);
+            const col = parseInt(pixel.dataset.col);
+            
+            switch (gameState.currentTool) {
+                case 'brush':
+                    paintPixel(row, col, gameState.currentColor);
+                    break;
+                case 'eraser':
+                    paintPixel(row, col, '#2c2c54');
+                    break;
+                case 'fill':
+                    fillArea(row, col, gameState.pixels[row][col].color, gameState.currentColor);
+                    break;
+                case 'picker':
+                    pickColor(row, col);
+                    break;
+            }
+            
+            updatePreview();
+        }
+
+        // 绘制像素
+        function paintPixel(row, col, color) {
+            if (row < 0 || row >= gameState.canvasSize || col < 0 || col >= gameState.canvasSize) return;
+            
+            const pixel = gameState.pixels[row][col];
+            pixel.color = color;
+            pixel.element.style.backgroundColor = color;
+        }
+
+        // 填充区域
+        function fillArea(row, col, targetColor, replacementColor) {
+            if (targetColor === replacementColor) return;
+            if (row < 0 || row >= gameState.canvasSize || col < 0 || col >= gameState.canvasSize) return;
+            if (gameState.pixels[row][col].color !== targetColor) return;
+            
+            // 使用递归进行洪水填充
+            paintPixel(row, col, replacementColor);
+            
+            // 递归填充相邻像素
+            fillArea(row + 1, col, targetColor, replacementColor);
+            fillArea(row - 1, col, targetColor, replacementColor);
+            fillArea(row, col + 1, targetColor, replacementColor);
+            fillArea(row, col - 1, targetColor, replacementColor);
+        }
+
+        // 取色
+        function pickColor(row, col) {
+            const color = gameState.pixels[row][col].color;
+            gameState.currentColor = color;
+            updateCurrentColorDisplay();
+            
+            // 更新调色板选中状态
+            document.querySelectorAll('.color').forEach(colorElement => {
+                colorElement.classList.remove('active');
+                if (colorElement.dataset.color === color) {
+                    colorElement.classList.add('active');
+                }
+            });
+        }
+
+        // 更新预览
+        function updatePreview() {
+            for (let row = 0; row < gameState.canvasSize; row++) {
+                for (let col = 0; col < gameState.canvasSize; col++) {
+                    const pixel = gameState.pixels[row][col];
+                    const previewPixel = gameState.previewPixels[row][col];
+                    
+                    previewPixel.color = pixel.color;
+                    previewPixel.element.style.backgroundColor = pixel.color;
+                }
+            }
+        }
+
+        // 加载预设图案
+        function loadPreset(presetId) {
+            // 清空画布
+            clearCanvas();
+            
+            // 根据预设ID绘制图案
+            switch(presetId) {
+                case 'heart':
+                    // 绘制心形
+                    for (let row = 3; row < 13; row++) {
+                        for (let col = 3; col < 13; col++) {
+                            if (
+                                (row === 3 && (col === 5 || col === 6 || col === 9 || col === 10)) ||
+                                (row === 4 && (col === 4 || col === 7 || col === 8 || col === 11)) ||
+                                (row === 5 && (col >= 3 && col <= 12)) ||
+                                (row === 6 && (col >= 3 && col <= 12)) ||
+                                (row === 7 && (col >= 4 && col <= 11)) ||
+                                (row === 8 && (col >= 5 && col <= 10)) ||
+                                (row === 9 && (col >= 6 && col <= 9)) ||
+                                (row === 10 && (col >= 7 && col <= 8))
+                            ) {
+                                paintPixel(row, col, '#FF4757');
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'star':
+                    // 绘制星星
+                    for (let row = 3; row < 13; row++) {
+                        for (let col = 3; col < 13; col++) {
+                            if (
+                                (row === 3 && col === 8) ||
+                                (row === 4 && (col === 7 || col === 9)) ||
+                                (row === 5 && (col === 6 || col === 8 || col === 10)) ||
+                                (row === 6 && (col >= 5 && col <= 11)) ||
+                                (row === 7 && (col === 4 || col === 6 || col === 8 || col === 10 || col === 12)) ||
+                                (row === 8 && (col === 3 || col === 5 || col === 7 || col === 9 || col === 11)) ||
+                                (row === 9 && (col === 4 || col === 6 || col === 8 || col === 10 || col === 12)) ||
+                                (row === 10 && (col >= 5 && col <= 11)) ||
+                                (row === 11 && (col === 6 || col === 8 || col === 10)) ||
+                                (row === 12 && (col === 7 || col === 9))
+                            ) {
+                                paintPixel(row, col, '#FFD32A');
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'cat':
+                    // 绘制小猫
+                    for (let row = 2; row < 14; row++) {
+                        for (let col = 2; col < 14; col++) {
+                            if (
+                                (row === 2 && (col === 5 || col === 6 || col === 9 || col === 10)) ||
+                                (row === 3 && (col === 4 || col === 7 || col === 8 || col === 11)) ||
+                                (row === 4 && (col >= 3 && col <= 12)) ||
+                                (row === 5 && (col === 3 || col === 5 || col === 6 || col === 9 || col === 10 || col === 12)) ||
+                                (row === 6 && (col === 3 || col === 5 || col === 6 || col === 9 || col === 10 || col === 12)) ||
+                                (row === 7 && (col >= 3 && col <= 12)) ||
+                                (row === 8 && (col === 4 || col === 5 || col === 6 || col === 9 || col === 10 || col === 11)) ||
+                                (row === 9 && (col === 4 || col === 5 || col === 10 || col === 11)) ||
+                                (row === 10 && (col === 5 || col === 6 || col === 9 || col === 10)) ||
+                                (row === 11 && (col === 6 || col === 7 || col === 8 || col === 9)) ||
+                                (row === 12 && (col === 7 || col === 8))
+                            ) {
+                                paintPixel(row, col, '#F97F51');
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'house':
+                    // 绘制房子
+                    for (let row = 5; row < 16; row++) {
+                        for (let col = 4; col < 12; col++) {
+                            if (
+                                (row === 5 && col === 8) ||
+                                (row === 6 && (col === 7 || col === 8 || col === 9)) ||
+                                (row >= 7 && row <= 11 && col >= 5 && col <= 11) ||
+                                (row === 9 && col >= 7 && col <= 9) ||
+                                (row >= 12 && row <= 15 && (col === 6 || col === 10))
+                            ) {
+                                paintPixel(row, col, '#1E90FF');
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'tree':
+                    // 绘制树
+                    for (let row = 4; row < 16; row++) {
+                        for (let col = 4; col < 12; col++) {
+                            if (
+                                (row === 4 && col === 8) ||
+                                (row === 5 && (col >= 7 && col <= 9)) ||
+                                (row === 6 && (col >= 6 && col <= 10)) ||
+                                (row === 7 && (col >= 5 && col <= 11)) ||
+                                (row === 8 && (col >= 6 && col <= 10)) ||
+                                (row === 9 && (col >= 7 && col <= 9)) ||
+                                (row >= 10 && row <= 15 && col === 8)
+                            ) {
+                                paintPixel(row, col, '#20BF6B');
+                            }
+                        }
+                    }
+                    break;
+            }
+            
+            updatePreview();
+        }
+
+        // 清空画布
+        function clearCanvas() {
+            for (let row = 0; row < gameState.canvasSize; row++) {
+                for (let col = 0; col < gameState.canvasSize; col++) {
+                    paintPixel(row, col, '#2c2c54');
+                }
+            }
+            updatePreview();
+        }
+
+        // 生成随机图案
+        function generateRandomArt() {
+            clearCanvas();
+            
+            // 随机生成一些像素
+            for (let i = 0; i < 50; i++) {
+                const row = Math.floor(Math.random() * gameState.canvasSize);
+                const col = Math.floor(Math.random() * gameState.canvasSize);
+                const colorIndex = Math.floor(Math.random() * colorPalette.length);
+                
+                paintPixel(row, col, colorPalette[colorIndex]);
+            }
+            
+            updatePreview();
+        }
+
+        // 保存作品
+        function saveArtwork() {
+            // 在实际应用中，这里可以将作品保存为图片
+            // 这里我们模拟保存功能
+            alert('作品已保存！\n\n在实际应用中，这里可以将您的像素艺术保存为图片文件。\n\n您可以截图保存当前作品。');
+            
+            // 创建一个临时canvas来保存图片
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const pixelSize = 20;
+            
+            canvas.width = gameState.canvasSize * pixelSize;
+            canvas.height = gameState.canvasSize * pixelSize;
+            
+            // 绘制背景
+            ctx.fillStyle = '#2c2c54';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制像素
+            for (let row = 0; row < gameState.canvasSize; row++) {
+                for (let col = 0; col < gameState.canvasSize; col++) {
+                    const pixel = gameState.pixels[row][col];
+                    if (pixel.color !== '#2c2c54') {
+                        ctx.fillStyle = pixel.color;
+                        ctx.fillRect(col * pixelSize, row * pixelSize, pixelSize, pixelSize);
+                    }
+                }
+            }
+            
+            // 在实际应用中，这里可以触发下载
+            // const link = document.createElement('a');
+            // link.download = 'pixel-art.png';
+            // link.href = canvas.toDataURL();
+            // link.click();
+        }
+
+        // 页面加载完成后初始化游戏
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+
+
+</body></html>
